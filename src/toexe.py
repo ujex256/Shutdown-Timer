@@ -2,12 +2,17 @@ import PySimpleGUI as sg
 from subprocess import run as run_command
 from time import sleep
 from playsound import playsound
+import os.path as path
 import sys
-from os import path
-
 
 sg.theme('DarkBlue14')
 minutes = [20, 25, 30, 35]
+
+# 没
+def get_h_m_s(sec):
+    m, s = divmod(sec, 60)
+    h, m = divmod(m, 60)
+    return h, m, s
 
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -15,7 +20,7 @@ def resource_path(relative_path):
     return path.join(path.abspath("."), relative_path)
 
 def shutdown(sec: int = 0, comment: str = "null"):
-    run_command(["shutdown", "/s", "/t", str(sec), "/c", comment], shell=True)
+    run_command(["shutdown", "/r", "/t", str(sec), "/c", comment], shell=True)
     return
 
 
@@ -34,8 +39,9 @@ layout = [
     [sg.Button("タイマー開始", font=("游ゴシック bold", 14), key="-START-"),
      sg.Text(text_color="red", key="-ERRORTEXT-")]
 ]
-window = sg.Window("ShutDownTimer", layout, size=(
-    390, 230), resizable=True, finalize=True)
+window = sg.Window("ShutdownTimer", layout, size=(
+    390, 230))
+
 started = False
 shutdown_count_started = False
 
@@ -50,14 +56,19 @@ while True:
                 shutdown(4, "解除禁止^^")
             elif values["-SHUTDOWN-"]:
                 shutdown(124, "2分後にシャットダウンします...")
-                playsound(resource_path("timer_end.wav"))
+                if values["-SOUND-"]:
+                    playsound(resource_path("timer_end.wav"))
+
                 window["-MIN-"].update(2)
                 window["-SEC-"].update(0)
                 shutdown_count_started = True
             else:
                 window["-MIN-"].update("", disabled=False)
                 window["-SEC-"].update("", disabled=False)
+                if values["-SOUND-"]:
+                    playsound(resource_path("timer_end.wav"))
                 started = False
+
         elif sec == 0:
             window["-MIN-"].update(min - 1)
             window["-SEC-"].update(59)
@@ -66,7 +77,6 @@ while True:
         event, values = window.read(timeout=1000)
     else:
         event, values = window.read()
-
 
     if event == "-START-":
         min_is_int = values["-MIN-"].isdecimal()
@@ -91,6 +101,5 @@ while True:
 
     if event == sg.WIN_CLOSED:
         break
-
 
 window.close()
