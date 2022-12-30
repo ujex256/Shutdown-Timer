@@ -14,7 +14,7 @@ def get_h_m_s(sec):
     return h, m, s
 
 def shutdown(sec: int = 0, comment: str = "null"):
-    run_command(["shutdown", "/r", "/t", str(sec), "/c", comment], shell=True)
+    run_command(["shutdown", "/s", "/t", str(sec), "/c", comment], shell=True)
     return
 
 
