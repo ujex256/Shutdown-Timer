@@ -33,8 +33,9 @@ layout = [
     [sg.Button("タイマー開始", font=("游ゴシック bold", 14), key="-START-"),
      sg.Text(text_color="red", key="-ERRORTEXT-")]
 ]
-window = sg.Window("ShutDownTimer", layout, size=(
-    390, 230), resizable=True, finalize=True)
+window = sg.Window("ShutdownTimer", layout, size=(
+    390, 230))
+
 started = False
 shutdown_count_started = False
 
@@ -49,14 +50,19 @@ while True:
                 shutdown(4, "解除禁止^^")
             elif values["-SHUTDOWN-"]:
                 shutdown(124, "2分後にシャットダウンします...")
-                playsound(r"./timer_end.wav")
+                if values["-SOUND-"]:
+                    playsound("./timer_end.wav")
+
                 window["-MIN-"].update(2)
                 window["-SEC-"].update(0)
                 shutdown_count_started = True
             else:
                 window["-MIN-"].update("", disabled=False)
                 window["-SEC-"].update("", disabled=False)
+                if values["-SOUND-"]:
+                    playsound("./timer_end.wav")
                 started = False
+
         elif sec == 0:
             window["-MIN-"].update(min - 1)
             window["-SEC-"].update(59)
@@ -65,7 +71,6 @@ while True:
         event, values = window.read(timeout=1000)
     else:
         event, values = window.read()
-
 
     if event == "-START-":
         min_is_int = values["-MIN-"].isdecimal()
@@ -90,6 +95,5 @@ while True:
 
     if event == sg.WIN_CLOSED:
         break
-
 
 window.close()
